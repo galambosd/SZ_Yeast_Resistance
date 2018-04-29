@@ -7,14 +7,26 @@ option_list <- list(make_option(c("-g","--GFF"),
     help="Path to the VCF file of the variant strain.",
     metavar="VCF"))
 
-opt_parser=OptionParser(option_list=option_list)
-args=parse_args(opt_parser)
+opt_parser <- OptionParser(option_list=option_list)
+args <- parse_args(opt_parser)
 
 # get the gff and vcf file from the command line
 
-gff_df = read.delim(args$GFF,sep=" ",header=FALSE,row.names=FALSE,col.names=FALSE)
+gff_master <- read.delim(args$GFF,sep="\ ",header=FALSE)
 
 # make sense of gff file, convert coordinates
+
+# make a separate dataframe for the dictionary
+gff_contigs_df <- subset(gff_master, gff_master$V3 == 'contig')
+contigs_list <- gff_contigs_df$V5
+names(contigs_list) <- gff_contigs_df$V1
+
+# make a separate df with all the real data
+
+
+# Make a dictionary with the ID mapping to the length of the contig
+# write a function to convert coordinates by adding up lengths of all previous contigs
+# How well does it match up to VCF file?
 
 
 # filter/make sense of vcf file
