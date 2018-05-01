@@ -1,4 +1,5 @@
 library('optparse')
+library('plyr')
 
 # write arg parser
 option_list <- list(make_option(c("-g","--GFF"),
@@ -19,7 +20,7 @@ gff_master <- read.delim(args$GFF,sep="\ ",header=FALSE)
 # make a separate dataframe for the dictionary
 gff_contigs_df <- subset(gff_master, gff_master$V3 == 'contig')
 contigs_list <- as.numeric(as.character(gff_contigs_df$V5))
-names(contigs_list) <- gff_contigs_df$V1
+names(contigs_list) <- as.character(gff_contigs_df$V1)
 
 # The contigs list shows how much to add to the coordinates
 contigs_to_add <- c(1:length(contigs_list))
@@ -36,31 +37,56 @@ orf_df <- subset(orf_df, orf_df$V3 == 'gene')
 # Make a dictionary with the ID mapping to the length of the contig
 # write a function to convert coordinates by adding up lengths of all previous contigs
 
-convert_coords <- function(coords){
-  new_row[,4] <- as.numeric(as.character(row[,4])) + contigs_to_add[factor(row[,1])]
-  new_row[,5] <- as.numeric(as.character(row[,5])) + contigs_to_add[factor(row[,1])]
- return(new_row)
+get_add <- function(x){
+ return(contigs_to_add[as.character(x)])
 }
 
-# orf_df$4 <- lapply(orf_df$4,convert_coords,1,)
+to_add <- lapply(orf_df$V1, get_add)
 
+orf_df$V4 <- as.numeric(as.character(orf_df$V4))
+orf_df$V5 <- as.numeric(as.character(orf_df$V5))
+to_add <- as.numeric(as.character(to_add))
 
-for (i in c(1:10)){
-  orf_df[i,4] <- as.numeric(as.character(orf_df[i,4])) + contigs_to_add[factor(orf_df[i,1])]
-  orf_df[i,5] <- as.numeric(as.character(orf_df[i,5])) + contigs_to_add[factor(orf_df[i,1])]
- }
+orf_df$V4<- orf_df$V4 + to_add
+orf_df$V5<- orf_df$V5 + to_add
+
 # orf_df$V4 <- as.numeric(as.character(orf_df$V4))+contigs_to_add[factor(orf_df$V1)]
 # orf_df$V5 <- as.numeric(as.character(orf_df$V5))+contigs_to_add[factor(orf_df$V1)]
 
-contigs_to_add
-orf_df
-
 # How well does it match up to VCF file?
 
-
 # filter/make sense of vcf file
+vcf_master <- read.delim(args$VCF,sep="\t",header=FALSE, skip = 29)
+
+vcf_master$V2 <- as.numeric(as.character(vcf_master$V2))
+vcf_master$V6 <- as.numeric(as.character(vcf_master$V6))
+
+vcf_df <- subset(vcf_master, vcf_master$V6 >= 25)
+
+SNVs <- vcf_df$V2
 
 
+get_snv_gene <- function(coord){
+  target <- subset(orf_df, (orf_df$V5 >= coord) & (orf_df$V4 <= coord))
+  return(target)
+}
+
+snv_orfs <- lapply(SNVs,get_snv_gene)
+
+
+vcf_rows <- sapply(snv_orfs,nrow) >0
+snv_orfs <- snv_orfs[vcf_rows]
+
+
+snv_orf_df <- ldply(snv_orfs)
+snv_orf_df <- snv_orf_df[,c(1,4,5,7,9)]
+vcf_df_to_output <- vcf_df[vcf_rows,c(4:6)]
+
+combined_df <- cbind(snv_orf_df, vcf_df_to_output)
+
+colnames(combined_df) <- c('contig ID', 'start','stop','strand','gene','REF','ALT','qual')
+
+write.table(combined_df,file="SNV_genes.txt",quote=FALSE, sep='\t')
 # go through the vcf file and output all snvs to a text file?
 # first, transfer output info to dataframe
 # enable transition to only outputting snvs that appear in a gene
