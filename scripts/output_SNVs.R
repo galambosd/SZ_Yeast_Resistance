@@ -65,7 +65,6 @@ vcf_df <- subset(vcf_master, vcf_master$V6 >= 25)
 
 SNVs <- vcf_df$V2
 
-
 get_snv_gene <- function(coord){
   target <- subset(orf_df, (orf_df$V5 >= coord) & (orf_df$V4 <= coord))
   return(target)
@@ -73,10 +72,8 @@ get_snv_gene <- function(coord){
 
 snv_orfs <- lapply(SNVs,get_snv_gene)
 
-
 vcf_rows <- sapply(snv_orfs,nrow) >0
 snv_orfs <- snv_orfs[vcf_rows]
-
 
 snv_orf_df <- ldply(snv_orfs)
 snv_orf_df <- snv_orf_df[,c(1,4,5,7,9)]
