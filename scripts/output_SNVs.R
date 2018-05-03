@@ -77,13 +77,13 @@ snv_orfs <- snv_orfs[vcf_rows]
 
 snv_orf_df <- ldply(snv_orfs)
 snv_orf_df <- snv_orf_df[,c(1,4,5,7,9)]
-vcf_df_to_output <- vcf_df[vcf_rows,c(4:6)]
+vcf_df_to_output <- vcf_df[vcf_rows,c(2,4:6)]
 snv_orf_df
 vcf_df_to_output
 
 combined_df <- cbind(snv_orf_df, vcf_df_to_output)
 
-colnames(combined_df) <- c('contig ID', 'start','stop','strand','gene','REF','ALT','qual')
+colnames(combined_df) <- c('contig ID', 'start','stop','strand','gene','POS','REF','ALT','qual')
 
 write.table(combined_df,file="SNV_genes.txt",quote=FALSE, sep='\t')
 # go through the vcf file and output all snvs to a text file?
