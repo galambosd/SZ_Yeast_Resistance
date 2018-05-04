@@ -1,5 +1,7 @@
+from sys import args
+
 gene_list = []
-inFile = open('SNV_genes_735540-3.txt')
+inFile = open(args[0])
 for line in inFile.readlines()[1:]:
     splits = line.split('\t')
     gene_descrip=splits[5]
@@ -9,7 +11,7 @@ for line in inFile.readlines()[1:]:
 
 gene_list=set(gene_list)
 
-outFile = open('735540-3_genes_SNVS.txt','w')
+outFile = open(args[1],'w')
 for gene in gene_list:
     if gene != 'UNDEF':
         outFile.write(gene + '\n')
