@@ -85,7 +85,7 @@ combined_df <- cbind(snv_orf_df, vcf_df_to_output)
 
 colnames(combined_df) <- c('contig ID', 'start','stop','strand','gene','POS','REF','ALT','qual')
 
-write.table(combined_df,file="SNV_genes.txt",quote=FALSE, sep='\t')
+write.table(combined_df,file="SNV_genes.txt",quote=FALSE, sep='\t', row.names=FALSE)
 # go through the vcf file and output all snvs to a text file?
 # first, transfer output info to dataframe
 # enable transition to only outputting snvs that appear in a gene
