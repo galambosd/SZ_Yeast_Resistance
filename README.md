@@ -13,3 +13,4 @@ R and python scripts used to...
   * Output those SNVs and their annotations
 ## Dependencies
 * optparse (R)
+* dplyr (R)
